@@ -10,15 +10,15 @@ on:
         description: 'SpotC++ Version Number'
         required: false
       USEACTIONSEEVEE:
-        description: 'Get EeveeSpotify from latest EeveeSpotfiy build action'
+        description: 'Get EeveeSpotifyReborn from latest EeveeSpotfiy build action'
         required: true
         default: false
         type: boolean
       EEVEEVERSION:
-        description: 'EeveeSpotify Version'
+        description: 'EeveeSpotifyReborn Version'
         required: false
       EEVEEREPO:
-        description: 'Override repo for EeveeSpotify'
+        description: 'Override repo for EeveeSpotifyReborn'
         required: false
 
 jobs:
@@ -41,16 +41,16 @@ jobs:
         echo "WORKFLOWURL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
         echo "Workflow URL is $WORKFLOWURL"
 
-    - name: Set EeveeSpotify Repo if given
+    - name: Set EeveeSpotifyReborn Repo if given
       if: ${{ github.event.inputs.EEVEEREPO != '' }}
       run: |
         EEVEEREPO=$(echo "${{ github.event.inputs.EEVEEREPO }}" | sed -E 's|https://github.com/([^/]+)/([^/]+)|\1/\2|' | sed 's|^https://github.com/||')
         echo "EEVEEREPO=$EEVEEREPO" >> $GITHUB_ENV
         
-    - name: Set EeveeSpotify Repo if not given
+    - name: Set EeveeSpotifyReborn Repo if not given
       if: ${{ github.event.inputs.EEVEEREPO == '' }}
       run: |
-        EEVEEREPO=$(echo "whoeevee/EeveeSpotify")
+        EEVEEREPO=$(echo "whoeevee/EeveeSpotifyReborn")
         echo "EEVEEREPO=$EEVEEREPO" >> $GITHUB_ENV
 
     - name: Set up Python 3.13
@@ -325,7 +325,7 @@ jobs:
       if: ${{ env.VIRUSTOTALKEY }}
       run: echo "VTSPOSIFYFIX=${{ steps.vt-sposifyfix.outputs.analysis }}" >> $GITHUB_ENV
 
-    - name: Download EeveeSpotify .deb file from releases
+    - name: Download EeveeSpotifyReborn .deb file from releases
       if: ${{ github.event.inputs.USEACTIONSEEVEE == 'false' }}
       run: |
         eevee_asset=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ env.EEVEEREPO }}/releases/tags/${{ env.EEVEETAG }} | jq -r '.assets[] | select(.name | startswith("com.eevee.spotify") and endswith("iphoneos-arm.deb")).browser_download_url')
@@ -338,7 +338,7 @@ jobs:
       env:
         EEVEETAG: ${{ env.EEVEETAG }}
 
-    - name: Download EeveeSpotify .deb file from artifacts
+    - name: Download EeveeSpotifyReborn .deb file from artifacts
       if: ${{ github.event.inputs.USEACTIONSEEVEE == 'true' }}
       run: |
         workflow_run_id=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ env.EEVEEREPO }}/actions/workflows/build-swift.yml/runs?status=success&per_page=1" | jq -r '.workflow_runs[0].id')
@@ -358,7 +358,7 @@ jobs:
         echo "eeveeAssetLink=$eevee_asset" >> $GITHUB_ENV
 
     
-    - name: Upload EeveeSpotify to VirusTotal
+    - name: Upload EeveeSpotifyReborn to VirusTotal
       if: ${{ env.VIRUSTOTALKEY }}
       uses: crazy-max/ghaction-virustotal@v4
       id: vt-eevee
@@ -371,7 +371,7 @@ jobs:
         RELEASE_TITLE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ env.EEVEEREPO }}/releases/tags/${{ env.EEVEETAG }}" | jq -r '.name')
         echo "EEVEEVERSIONNAME=$RELEASE_TITLE" >> $GITHUB_ENV
         
-    - name: Set VirusTotal Analysis URL for EeveeSpotify
+    - name: Set VirusTotal Analysis URL for EeveeSpotifyReborn
       if: ${{ env.VIRUSTOTALKEY }}
       run: echo "VTEEVEE=${{ steps.vt-eevee.outputs.analysis }}" >> $GITHUB_ENV
 
@@ -463,7 +463,7 @@ jobs:
 
         # Fetch previous versions.
         spotify_version=$(echo "$latest_info" | jq -r '.[] | select(.item == "Spotify") | .version')
-        eeveespotify_version=$(echo "$latest_info" | jq -r '.[] | select(.item == "EeveeSpotify") | .version')
+        EeveeSpotifyReborn_version=$(echo "$latest_info" | jq -r '.[] | select(.item == "EeveeSpotifyReborn") | .version')
         sposify_version=$(echo "$latest_info" | jq -r '.[] | select(.item == "Sposify") | .version')
         openspotify_version=$(echo "$latest_info" | jq -r '.[] | select(.item == "OpenSpotifySafariExtension") | .version')
         sposifyfix_version=$(echo "$latest_info" | jq -r '.[] | select(.item == "Sposify Fix") | .version')
@@ -478,12 +478,12 @@ jobs:
           echo "SPOTIFY_UPDATED=false" >> $GITHUB_ENV
         fi
     
-        # EeveeSpotify
-        if [ "$eeveespotify_version" != "${{ env.EEVEEVERSIONNAME }}" ]; then
-          echo "EeveeSpotify version updated from $eeveespotify_version to ${{ env.EEVEEVERSIONNAME }}"
-          echo "EEVEESPOTIFY_UPDATED=true" >> $GITHUB_ENV
+        # EeveeSpotifyReborn
+        if [ "$EeveeSpotifyReborn_version" != "${{ env.EEVEEVERSIONNAME }}" ]; then
+          echo "EeveeSpotifyReborn version updated from $EeveeSpotifyReborn_version to ${{ env.EEVEEVERSIONNAME }}"
+          echo "EeveeSpotifyReborn_UPDATED=true" >> $GITHUB_ENV
         else
-          echo "EEVEESPOTIFY_UPDATED=false" >> $GITHUB_ENV
+          echo "EeveeSpotifyReborn_UPDATED=false" >> $GITHUB_ENV
         fi
     
         # Sposify
@@ -615,7 +615,7 @@ jobs:
         echo "Vanilla Spotify VT: $VTVANILLASPOTIFY"
         echo "VTVANILLASPOTIFY=$VTVANILLASPOTIFY" >> $GITHUB_ENV
         VTEEVEE=$(echo "$VTEEVEE" | sed 's/.*\(https:\/\/.*\)/\1/')
-        echo "EeveeSpotify VT: $VTEEVEE"
+        echo "EeveeSpotifyReborn VT: $VTEEVEE"
         echo "VTEEVEE=$VTEEVEE" >> $GITHUB_ENV
         VTSPOSIFY=$(echo "$VTSPOSIFY" | sed 's/.*\(https:\/\/.*\)/\1/')
         echo "Sposify VT: $VTSPOSIFY"
@@ -638,22 +638,22 @@ jobs:
         echo "## ChangeLog" > changelog.txt
         
     - name: Contruct ChangeLog Pt.2 (Eevee ChangeLog [Release])
-      if: ${{ github.event.inputs.USEACTIONSEEVEE == 'false' && env.EEVEESPOTIFY_UPDATED == 'true' }}
+      if: ${{ github.event.inputs.USEACTIONSEEVEE == 'false' && env.EeveeSpotifyReborn_UPDATED == 'true' }}
       run: |
-        echo "$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ env.EEVEEREPO }}/releases/tags/${{ env.EEVEETAG }} | jq -r '.body' | sed -n '/^[[:space:]]*[*-+][[:space:]]/ { s/^[[:space:]]*[*-+] //; s/^/- (EeveeSpotify) /; p; }')" >> changelog.txt
+        echo "$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ env.EEVEEREPO }}/releases/tags/${{ env.EEVEETAG }} | jq -r '.body' | sed -n '/^[[:space:]]*[*-+][[:space:]]/ { s/^[[:space:]]*[*-+] //; s/^/- (EeveeSpotifyReborn) /; p; }')" >> changelog.txt
         
     - name: Contruct ChangeLog Pt.2 (Eevee ChangeLog [Actions])
       if: ${{ github.event.inputs.USEACTIONSEEVEE == 'true' }}
       run: |
-        echo "$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ env.EEVEEREPO }}/commits?since=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ env.EEVEEREPO }}/releases/latest | jq -r .published_at)" | jq -r '.[].commit.message' | grep -Ev "update: repo|Merge branch .+ of .+ into .+" | sed 's/^/- (EeveeSpotify) /')" >> changelog.txt
+        echo "$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ env.EEVEEREPO }}/commits?since=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ env.EEVEEREPO }}/releases/latest | jq -r .published_at)" | jq -r '.[].commit.message' | grep -Ev "update: repo|Merge branch .+ of .+ into .+" | sed 's/^/- (EeveeSpotifyReborn) /')" >> changelog.txt
 
     - name: Contruct ChangeLog Pt.3 (Add updated component lines)
       run: |
         if [ "${{ env.SPOTIFY_UPDATED }}" = "true" ]; then
           echo "- Updated Spotify to version ${{ env.VANILLASPOTIFYVERSION }} </br>" >> changelog.txt
         fi
-        if [ "${{ env.EEVEESPOTIFY_UPDATED }}" = "true" ]; then
-          echo "- Updated [EeveeSpotify](https://github.com/${{ env.EEVEEREPO }}) to version ${{ env.EEVEEVERSIONNAME }} </br>" >> changelog.txt
+        if [ "${{ env.EeveeSpotifyReborn_UPDATED }}" = "true" ]; then
+          echo "- Updated [EeveeSpotifyReborn](https://github.com/${{ env.EEVEEREPO }}) to version ${{ env.EEVEEVERSIONNAME }} </br>" >> changelog.txt
         fi
         if [ "${{ env.SPOSIFY_UPDATED }}" = "true" ]; then
           echo "- Updated Sposify to version ${{ env.SPOSIFYVERSION }} </br>" >> changelog.txt
@@ -674,7 +674,7 @@ jobs:
     - name: Contruct ChangeLog Pt.4 (Rest of changelog)
       run: |
         # Hyperlink mentions of issues:
-        tail -n +2 changelog.txt | sed -E 's/#([0-9]+)/[#\1](https:\/\/github.com\/whoeevee\/EeveeSpotify\/issues\/\1)/g' > temp_changelog.txt
+        tail -n +2 changelog.txt | sed -E 's/#([0-9]+)/[#\1](https:\/\/github.com\/whoeevee\/EeveeSpotifyReborn\/issues\/\1)/g' > temp_changelog.txt
         head -n 1 changelog.txt > final_changelog.txt
         cat temp_changelog.txt >> final_changelog.txt
         mv final_changelog.txt changelog.txt
@@ -683,13 +683,13 @@ jobs:
         echo "***" >> changelog.txt
         echo "Vanilla IPA decrypted using [BagBak](https://github.com/ChiChou/bagbak), on my personal MacBook Air and Jailbroken iPhone X running [Dopamine](https://github.com/opa334/Dopamine), feel free to contact me with questions about this environment." >> changelog.txt
     
-    - name: Construct ChangeLog Pt.5 (Add EeveeSpotify Workflow Link)
+    - name: Construct ChangeLog Pt.5 (Add EeveeSpotifyReborn Workflow Link)
       if: ${{ github.event.inputs.USEACTIONSEEVEE == 'true' }}
       run: |
         assetnoZIP=$(echo "${{ env.eeveeAssetLink }}" | sed 's/\/zip$//')
         RUN_ID=$(curl -s $assetnoZIP | jq -r .workflow_run.id)
         eeveeUserAssetLink=$(echo "${{ env.eeveeAssetLink }}" | sed -E "s|https://api.github.com/repos/([^/]+)/([^/]+)/actions/artifacts/([0-9]+)/zip|https://github.com/\1/\2/actions/runs/${RUN_ID}/artifacts/\3|")
-        echo "The EeveeSpotify .deb was taken from the [latest Build workflow](${eeveeUserAssetLink})." >> changelog.txt
+        echo "The EeveeSpotifyReborn .deb was taken from the [latest Build workflow](${eeveeUserAssetLink})." >> changelog.txt
     
     - name: Construct ChangeLog Pt.6 (Add App Details and Workflow Link)
       run: |
@@ -703,8 +703,8 @@ jobs:
         echo "<br>" >> changelog.txt
         echo "<p>Spotify Version: v${{ env.VANILLASPOTIFYVERSION }}" >> changelog.txt
         echo "<br><a href='${{ env.VTVANILLASPOTIFY }}'>Vanilla Spotify VirusTotal</a></p>" >> changelog.txt
-        echo "<p>EeveeSpotify Version: ${{ env.EEVEEVERSIONNAME }}" >> changelog.txt
-        echo "<br><a href='${{ env.VTEEVEE }}'>EeveeSpotify .deb VirusTotal</a></p>" >> changelog.txt
+        echo "<p>EeveeSpotifyReborn Version: ${{ env.EEVEEVERSIONNAME }}" >> changelog.txt
+        echo "<br><a href='${{ env.VTEEVEE }}'>EeveeSpotifyReborn .deb VirusTotal</a></p>" >> changelog.txt
         echo "<p>Sposify v${{ env.SPOSIFYVERSION }}" >> changelog.txt
         echo "<br><a href='${{ env.VTSPOSIFY }}'>Sposify VirusTotal</a></p>" >> changelog.txt
         echo "<p>OpenSpotifySafariExtension Commit: ${{ env.EXTCOMMIT }}" >> changelog.txt
@@ -760,7 +760,7 @@ jobs:
         echo "AltStore SpotC++ File Size: $FILE_SIZE"
         echo "ALTSPOTCSIZE=$FILE_SIZE" >> $GITHUB_ENV
 
-    - name: Fetch the first bullet point from the EeveeSpotify release changelog
+    - name: Fetch the first bullet point from the EeveeSpotifyReborn release changelog
       id: fetch-changelog
       run: |
         BULLET_POINT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ env.EEVEEREPO }}/releases/tags/${{ env.EEVEETAG }} | jq -r '.body' | sed -n 's/^[[:space:]]*[*-+] //p; s/^[[:space:]]* //p' | grep -v '^$' | head -n 1 | awk 'tolower($0) ~ /localizat[io]?n/ {print "Improved localizations."; next} {print}')
@@ -768,8 +768,8 @@ jobs:
 
     - name: Set ALTSTORECHANGELOG environment variable
       run: |
-        if [ "${{ env.EEVEESPOTIFY_UPDATED }}" = "true" ]; then
-          ALTSTORECHANGELOG="Updated EeveeSpotify to ${{ env.EEVEEVERSIONNAME }}. ${{ env.BULLET_POINT }}"
+        if [ "${{ env.EeveeSpotifyReborn_UPDATED }}" = "true" ]; then
+          ALTSTORECHANGELOG="Updated EeveeSpotifyReborn to ${{ env.EEVEEVERSIONNAME }}. ${{ env.BULLET_POINT }}"
         else
           ALTSTORECHANGELOG="Updated Spotify to ${{ env.VANILLASPOTIFYVERSION }}."
         fi
@@ -821,7 +821,7 @@ jobs:
                   "url": "https://www.spotify.com"
               },
               {
-                  "item": "EeveeSpotify",
+                  "item": "EeveeSpotifyReborn",
                   "version": $EEVEEVERSIONNAME,
                   "authors": "Whoeevee & Asdfzxcvbn",
                   "url": "https://github.com/${{ env.EEVEEREPO }}"
@@ -908,7 +908,7 @@ jobs:
                   "url": "https://www.spotify.com"
               },
               {
-                  "item": "EeveeSpotify",
+                  "item": "EeveeSpotifyReborn",
                   "version": $EEVEEVERSIONNAME,
                   "authors": "Whoeevee & Asdfzxcvbn",
                   "url": "https://github.com/${{ env.EEVEEREPO }}"
